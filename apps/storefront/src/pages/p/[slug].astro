@@ -1,0 +1,77 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import StoreHeader from "../../components/store/StoreHeader.astro";
+import StoreFooter from "../../components/store/StoreFooter.astro";
+import pagesRaw from "@repo/cms/content/pages.json";
+import type { CmsPage } from "@repo/cms/types";
+import type { WithContext, WebPage, BreadcrumbList } from "schema-dts";
+
+export function getStaticPaths() {
+  const pages = pagesRaw as CmsPage[];
+  return pages
+    .filter((p) => p.status === "publish")
+    .map((page) => ({
+      params: { slug: page.slug },
+      props: { page },
+    }));
+}
+
+interface Props {
+  page: CmsPage;
+}
+
+const { page } = Astro.props;
+
+const siteUrl = Astro.site ? String(Astro.site) : "https://localhost:4321";
+const pageUrl = new URL(`/p/${page.slug}`, Astro.site ?? siteUrl).toString();
+
+const breadcrumb: WithContext<BreadcrumbList> = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "خانه", item: new URL("/", Astro.site).toString() },
+    { "@type": "ListItem", position: 2, name: page.title, item: pageUrl },
+  ],
+};
+
+const jsonLd: WithContext<WebPage> = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: page.title,
+  description: `صفحه ${page.title} در فروشگاه مدالینو`,
+  datePublished: page.date,
+  dateModified: page.date,
+  inLanguage: "fa",
+  url: pageUrl,
+  isAccessibleForFree: true,
+  isPartOf: { "@type": "WebSite", name: "مدالینو", url: siteUrl },
+  publisher: { "@type": "Organization", name: "مدالینو", url: siteUrl },
+};
+---
+
+<BaseLayout
+  title={`${page.title} | مدالینو`}
+  canonicalPath={`/p/${page.slug}`}
+  extraLd={[
+    jsonLd as unknown as Record<string, unknown>,
+    breadcrumb as unknown as Record<string, unknown>,
+  ]}
+>
+  <StoreHeader />
+  <main style="max-width:720px;margin:0 auto;padding:var(--space-8);">
+    <a href="/" style="color:var(--accent);text-decoration:none;font-size:var(--text-sm);">خانه</a>
+    <article style="margin-top:var(--space-6);">
+      <h1 style="margin:0 0 var(--space-6);font-size:1.75rem;line-height:1.35;">{page.title}</h1>
+      <div class="cms-body" set:html={page.body} />
+    </article>
+  </main>
+  <StoreFooter />
+</BaseLayout>
+
+<style is:global>
+  .cms-body p {
+    margin: var(--space-4) 0;
+    line-height: 1.85;
+    color: var(--text);
+  }
+</style>

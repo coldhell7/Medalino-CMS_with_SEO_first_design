@@ -1,0 +1,26 @@
+[
+  {
+    "id": "m1",
+    "url": "/images/hero-home.webp",
+    "alt": "فروشگاه آنلاین مدالینو — مراقبت سلامت",
+    "date": "2026-01-08T15:00:00.000Z"
+  },
+  {
+    "id": "m2",
+    "url": "/images/products/omega-3-premium.webp",
+    "alt": "امگا ۳ پریمیوم",
+    "date": "2026-01-09T11:00:00.000Z"
+  },
+  {
+    "id": "m3",
+    "url": "/images/banners/mid-banner.webp",
+    "alt": "سبک زندگی سالم و ورزش",
+    "date": "2026-01-10T09:00:00.000Z"
+  },
+  {
+    "id": "m4",
+    "url": "/images/blog/hydration-basics.webp",
+    "alt": "آبرسانی روزانه",
+    "date": "2026-01-11T10:00:00.000Z"
+  }
+]

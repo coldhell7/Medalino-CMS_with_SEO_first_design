@@ -1,0 +1,13 @@
+{
+  "name": "@repo/cms",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./content/posts.json": "./content/posts.json",
+    "./content/pages.json": "./content/pages.json",
+    "./content/media.json": "./content/media.json",
+    "./content/products.json": "./content/products.json",
+    "./content/homepage-blocks.json": "./content/homepage-blocks.json",
+    "./types": "./src/types.ts"
+  }
+}

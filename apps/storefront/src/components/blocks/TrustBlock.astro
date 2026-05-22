@@ -1,0 +1,45 @@
+---
+export interface Props {
+  items: Array<{ icon: string; title: string; desc: string }>;
+}
+
+const { items } = Astro.props;
+---
+
+<section class="trust-band">
+  <div class="trust-band__grid">
+    {items.map((item) => (
+      <div class="trust-item">
+        <span class="trust-item__icon" aria-hidden="true">{item.icon}</span>
+        <strong>{item.title}</strong>
+        <span>{item.desc}</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .trust-band {
+    border-block: 1px solid var(--border);
+    padding: var(--space-6) var(--space-4);
+    background: var(--bg);
+  }
+  .trust-band__grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .trust-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .trust-item strong { color: var(--text); font-size: var(--text-sm); }
+  .trust-item__icon { font-size: 1.4rem; margin-bottom: 2px; }
+</style>

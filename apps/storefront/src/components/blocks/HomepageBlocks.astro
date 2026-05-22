@@ -1,0 +1,120 @@
+---
+import HeroBlock from "./HeroBlock.astro";
+import StatsBlock from "./StatsBlock.astro";
+import TrustBlock from "./TrustBlock.astro";
+import CategoriesBlock from "./CategoriesBlock.astro";
+import ProductsBlock from "./ProductsBlock.astro";
+import MidBannerBlock from "./MidBannerBlock.astro";
+import QuotesBlock from "./QuotesBlock.astro";
+import PromoBlock from "./PromoBlock.astro";
+import MediaPressBlock from "./MediaPressBlock.astro";
+import blocksJson from "@repo/cms/content/homepage-blocks.json";
+import { getPublishedProducts, getFeaturedProducts } from "../../data/catalog";
+import type { CmsBlock } from "@repo/cms/types";
+
+const blocks = (blocksJson as CmsBlock[])
+  .filter((b) => b.enabled)
+  .sort((a, b) => a.order - b.order);
+
+const allProducts = getPublishedProducts();
+const featuredProducts = getFeaturedProducts();
+
+function getProductsForBlock(source: string) {
+  if (source === "featured") return featuredProducts;
+  return allProducts;
+}
+---
+
+{
+  blocks.map((block) => {
+    switch (block.type) {
+      case "hero":
+        return (
+          <HeroBlock
+            kicker={block.data.kicker as string}
+            title={block.data.title as string}
+            lead={block.data.lead as string}
+            image={block.data.image as string}
+            imageAlt={block.data.imageAlt as string}
+            badgeText={block.data.badgeText as string}
+            badgeDesc={block.data.badgeDesc as string}
+            buttons={block.data.buttons as Array<{ label: string; href: string; variant: string }>}
+          />
+        );
+      case "stats":
+        return (
+          <StatsBlock
+            title={block.data.title as string}
+            items={block.data.items as Array<{ value: string; label: string }>}
+          />
+        );
+      case "trust":
+        return (
+          <TrustBlock
+            items={block.data.items as Array<{ icon: string; title: string; desc: string }>}
+          />
+        );
+      case "categories":
+        return (
+          <CategoriesBlock
+            eyebrow={block.data.eyebrow as string}
+            title={block.data.title as string}
+            subtitle={block.data.subtitle as string}
+            linkText={block.data.linkText as string}
+            linkHref={block.data.linkHref as string}
+            items={block.data.items as Array<{ title: string; subtitle: string; hue: number; gid: string; coverImage: string }>}
+          />
+        );
+      case "products":
+        const products = getProductsForBlock(block.data.source as string);
+        return (
+          <ProductsBlock
+            eyebrow={block.data.eyebrow as string}
+            title={block.data.title as string}
+            subtitle={block.data.subtitle as string}
+            linkText={block.data.linkText as string}
+            linkHref={block.data.linkHref as string}
+            products={products}
+          />
+        );
+      case "mid_banner":
+        return (
+          <MidBannerBlock
+            image={block.data.image as string}
+            title={block.data.title as string}
+            text={block.data.text as string}
+            buttonLabel={block.data.buttonLabel as string}
+            buttonHref={block.data.buttonHref as string}
+          />
+        );
+      case "media_press":
+        return (
+          <MediaPressBlock
+            title={block.data.title as string}
+            items={block.data.items as Array<{ name: string; logo: string; url: string; quote: string }>}
+          />
+        );
+      case "quotes":
+        return (
+          <QuotesBlock
+            title={block.data.title as string}
+            items={block.data.items as Array<{ text: string; author: string }>}
+          />
+        );
+      case "promo":
+        return (
+          <PromoBlock
+            title={block.data.title as string}
+            text={block.data.text as string}
+            image={block.data.image as string}
+            imageAlt={block.data.imageAlt as string}
+            codeLabel={block.data.codeLabel as string}
+            codeValue={block.data.codeValue as string}
+            codeHint={block.data.codeHint as string}
+          />
+        );
+      default:
+        return null;
+    }
+  })
+}

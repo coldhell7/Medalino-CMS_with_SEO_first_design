@@ -1,0 +1,86 @@
+---
+export interface Props {
+  title: string;
+  text: string;
+  image: string;
+  imageAlt: string;
+  codeLabel: string;
+  codeValue: string;
+  codeHint: string;
+}
+
+const { title, text, image, imageAlt, codeLabel, codeValue, codeHint } = Astro.props;
+---
+
+<section class="promo-landing">
+  <div class="promo-landing__grid">
+    <div class="promo-landing__visual">
+      <img
+        src={image}
+        alt={imageAlt}
+        width="960"
+        height="1080"
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer-when-downgrade"
+        class="promo-landing__img"
+      />
+    </div>
+    <div class="promo-landing__copy">
+      <h3 class="promo-landing__title">{title}</h3>
+      <p class="promo-landing__text">{text}</p>
+      <div class="promo-code">
+        <p class="promo-code__label">{codeLabel}</p>
+        <p class="promo-code__value">{codeValue}</p>
+        <p class="promo-code__hint">{codeHint}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .promo-landing {
+    background: linear-gradient(135deg, #ecfdf5, #f0f9ff);
+    border-block: 1px solid var(--border);
+  }
+  .promo-landing__grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(2rem, 4vw, 3rem) var(--space-4);
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: 0.95fr 1.05fr;
+    align-items: center;
+  }
+  .promo-landing__visual {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1);
+    max-height: 420px;
+  }
+  .promo-landing__img { width: 100%; height: 100%; max-height: 420px; object-fit: cover; display: block; }
+  .promo-landing__title { margin: 0 0 var(--space-3); font-size: clamp(1.35rem, 2.4vw, 1.75rem); font-weight: 900; }
+  .promo-landing__text { margin: 0 0 var(--space-5); color: var(--text-muted); line-height: 1.85; }
+  .promo-code {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: var(--space-5);
+    background: var(--bg);
+  }
+  .promo-code__label { margin: 0 0 var(--space-2); font-weight: 800; }
+  .promo-code__value {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    direction: ltr;
+    text-align: center;
+  }
+  .promo-code__hint { margin: var(--space-3) 0 0; color: var(--text-muted); font-size: var(--text-sm); }
+  @media (max-width: 900px) {
+    .promo-landing__grid { grid-template-columns: 1fr; }
+    .promo-landing__visual { max-height: 260px; }
+  }
+</style>

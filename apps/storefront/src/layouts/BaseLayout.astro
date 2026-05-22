@@ -1,0 +1,118 @@
+---
+import "vazirmatn-font.css";
+import "@repo/ui/tokens.css";
+import JsonLd from "../components/JsonLd.astro";
+import type { MedicalWebPage, WithContext } from "schema-dts";
+import { getSiteSettings, getSeoSettings, applyMetaTemplate } from "../lib/site-settings";
+
+const settings = getSiteSettings();
+const seo = getSeoSettings();
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  extraLd?: Record<string, unknown>[];
+  keywords?: string;
+  robots?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogType?: string;
+  twitterCard?: string;
+}
+
+const {
+  title,
+  description = `${settings.siteDescription} — محتوای کنترل‌شده و تجربه سریع.`,
+  canonicalPath = "/",
+  extraLd = [],
+  keywords,
+  robots = "index,follow",
+  ogTitle,
+  ogDescription,
+  ogImage,
+  ogType = seo.ogTypeDefault || "website",
+  twitterCard = seo.twitterCardType || "summary_large_image",
+} = Astro.props;
+
+const siteUrl = seo.canonicalBaseUrl || settings.siteUrl;
+const resolvedCanonical = canonicalPath.startsWith("http") ? canonicalPath : `${siteUrl.replace(/\/$/, "")}${canonicalPath}`;
+const canonical = resolvedCanonical;
+const finalTitle = applyMetaTemplate(seo.metaTitleTemplate, { title, siteName: settings.siteName, category: "" });
+const finalDescription = applyMetaTemplate(seo.metaDescriptionTemplate, { description });
+const finalOgImage = ogImage || (seo.ogImageDefault ? `${siteUrl.replace(/\/$/, "")}${seo.ogImageDefault}` : undefined);
+const ogT = ogTitle ?? finalTitle;
+const ogD = ogDescription ?? finalDescription;
+
+const medicalPage: WithContext<MedicalWebPage> = {
+  "@context": "https://schema.org",
+  "@type": "MedicalWebPage",
+  name: finalTitle,
+  description: finalDescription,
+  url: canonical,
+  inLanguage: "fa",
+};
+
+const faqPage = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  inLanguage: "fa",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "آیا این صفحه توصیه پزشکی است؟",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "خیر. مطالب صرفاً اطلاع‌رسانی‌اند؛ برای تصمیم درمانی با پزشک مجاز مشورت کنید.",
+      },
+    },
+  ],
+};
+
+const structuredData = seo.structuredDataEnabled ? [
+  medicalPage,
+  faqPage,
+  ...extraLd
+] : extraLd;
+---
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="storefront">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {settings.faviconDataUrl ? (
+      <link rel="icon" type="image/x-icon" href={settings.faviconDataUrl} />
+    ) : (
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    )}
+    <link rel="canonical" href={canonical} />
+    <title>{finalTitle}</title>
+    <meta name="description" content={finalDescription} />
+    {keywords ? <meta name="keywords" content={keywords} /> : null}
+    <meta name="robots" content={robots} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={ogT} />
+    <meta property="og:description" content={ogD} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={seo.ogSiteName} />
+    <meta property="og:locale" content="fa_IR" />
+    {finalOgImage ? <meta property="og:image" content={finalOgImage} /> : null}
+    <meta name="twitter:card" content={twitterCard} />
+    <meta name="twitter:title" content={ogT} />
+    <meta name="twitter:description" content={ogD} />
+    {finalOgImage ? <meta name="twitter:image" content={finalOgImage} /> : null}
+    {seo.twitterSite && <meta name="twitter:site" content={seo.twitterSite} />}
+    {seo.twitterCreator && <meta name="twitter:creator" content={seo.twitterCreator} />}
+    {seo.fbAppId && <meta property="fb:app_id" content={seo.fbAppId} />}
+    <meta name="generator" content={Astro.generator} />
+    {structuredData.map((doc) => (
+      <JsonLd data={doc} />
+    ))}
+  </head>
+  <body
+    style="margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.65;"
+  >
+    <slot />
+  </body>
+</html>

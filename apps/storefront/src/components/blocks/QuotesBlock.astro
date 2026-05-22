@@ -1,0 +1,61 @@
+---
+export interface Props {
+  title: string;
+  items: Array<{ text: string; author: string }>;
+}
+
+const { title, items } = Astro.props;
+---
+
+<section class="quotes">
+  <div class="section__inner">
+    <h2 class="quotes__title">{title}</h2>
+    <div class="quotes__grid">
+      {items.map((item) => (
+        <figure class="quote-card">
+          <blockquote>{item.text}</blockquote>
+          <figcaption>{item.author}</figcaption>
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .quotes {
+    background: linear-gradient(180deg, #f8fafc, #ecfdf5);
+    border-block: 1px solid var(--border);
+    padding: clamp(2.5rem, 5vw, 3.5rem) var(--space-4);
+  }
+  .section__inner { max-width: 1100px; margin: 0 auto; }
+  .quotes__title {
+    margin: 0 0 var(--space-6);
+    text-align: center;
+    font-size: clamp(1.35rem, 2.5vw, 1.7rem);
+    font-weight: 900;
+  }
+  .quotes__grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  .quote-card {
+    margin: 0;
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+  .quote-card blockquote {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
+    line-height: 1.8;
+    color: var(--text);
+  }
+  .quote-card figcaption {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+</style>

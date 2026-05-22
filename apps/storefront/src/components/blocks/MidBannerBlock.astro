@@ -1,0 +1,87 @@
+---
+export interface Props {
+  image: string;
+  title: string;
+  text: string;
+  buttonLabel: string;
+  buttonHref: string;
+}
+
+const { image, title, text, buttonLabel, buttonHref } = Astro.props;
+---
+
+<section class="mid-banner">
+  <img
+    class="mid-banner__img"
+    src={image}
+    alt={title}
+    width="2000"
+    height="720"
+    loading="lazy"
+    decoding="async"
+    referrerpolicy="no-referrer-when-downgrade"
+  />
+  <div class="mid-banner__shade"></div>
+  <div class="mid-banner__content">
+    <h2 class="mid-banner__title">{title}</h2>
+    <p class="mid-banner__text">{text}</p>
+    <a href={buttonHref} class="btn btn--light">{buttonLabel}</a>
+  </div>
+</section>
+
+<style>
+  .mid-banner {
+    position: relative;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .mid-banner__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .mid-banner__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, rgba(15, 23, 42, 0.82) 0%, rgba(15, 23, 42, 0.45) 55%, rgba(15, 23, 42, 0.25) 100%);
+  }
+  .mid-banner__content {
+    position: relative;
+    max-width: 720px;
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+    color: #f8fafc;
+  }
+  .mid-banner__title {
+    margin: 0 0 var(--space-3);
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 900;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.35);
+  }
+  .mid-banner__text {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-base);
+    opacity: 0.95;
+    line-height: 1.75;
+  }
+  .btn--light {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: var(--text-sm);
+    text-decoration: none;
+    background: #fff;
+    color: #0f172a;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease;
+  }
+  .btn--light:hover { transform: translateY(-2px); }
+</style>

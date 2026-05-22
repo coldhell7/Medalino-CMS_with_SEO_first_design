@@ -1,0 +1,71 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import StoreHeader from "../components/store/StoreHeader.astro";
+import StoreFooter from "../components/store/StoreFooter.astro";
+import HomepageBlocks from "../components/blocks/HomepageBlocks.astro";
+import { getAdminUrl } from "../lib/admin-url";
+import type { ItemList, WithContext } from "schema-dts";
+
+const adminUrl = getAdminUrl();
+const landingKeywords =
+  "مدالینو، فروشگاه مکمل، ویتامین، مراقبت پوست، تجهیزات پزشکی، ارسال سریع، اصالت کالا";
+---
+
+<BaseLayout
+  title="مدالینو — فروشگاه آنلاین محصولات سلامت"
+  description="خرید مطمئن مکمل، ویتامین و تجهیزات پزشکی با ارسال سریع، تضمین اصالت و پشتیبانی حرفه‌ای."
+  canonicalPath="/"
+  keywords={landingKeywords}
+  ogTitle="مدالینو | سلامت و زیبایی با تجربهٔ مدرن"
+  ogDescription="لندینگ فروشگاه مدالینو — محصولات اصل، بنرهای الهام‌گرفته از مراقبت سلامت، و راهنمای خرید امن."
+  ogImage="/images/hero-home.webp"
+  ogType="website"
+  extraLd={[]}
+>
+  <div class="top-strip">
+    <span class="top-strip__text">
+      ارسال رایگان سفارش‌های بالای ۱٫۵ میلیون تومان — امشب تخفیف ویژه روی پروبیوتیک‌ها
+    </span>
+    <a href={adminUrl} target="_blank" rel="noopener noreferrer" class="top-strip__btn"> ورود به پنل مدیریت </a>
+  </div>
+
+  <StoreHeader />
+
+  <main>
+    <HomepageBlocks />
+  </main>
+
+  <StoreFooter />
+</BaseLayout>
+
+<style is:global>
+  .top-strip {
+    background: linear-gradient(105deg, #0f766e 0%, #0d9488 45%, #0ea5e9 100%);
+    color: #ecfeff;
+    font-size: var(--text-sm);
+    padding: 12px 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+  .top-strip__text {
+    text-align: center;
+    flex: 1;
+    min-width: 220px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+  .top-strip__btn {
+    flex-shrink: 0;
+    color: #042f2e;
+    background: #ecfdf5;
+    padding: 8px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 900;
+    font-size: var(--text-xs);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  }
+</style>

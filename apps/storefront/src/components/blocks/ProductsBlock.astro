@@ -1,0 +1,59 @@
+---
+import ProductCard from "../store/ProductCard.astro";
+
+export interface Props {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  linkText: string;
+  linkHref: string;
+  products: Array<unknown>;
+}
+
+const { eyebrow, title, subtitle, linkText, linkHref, products } = Astro.props;
+---
+
+<section class="section section--tight">
+  <div class="section__head">
+    <div>
+      <span class="section__eyebrow">{eyebrow}</span>
+      <h2 class="section__title">{title}</h2>
+      <p class="section__sub">{subtitle}</p>
+    </div>
+    {linkText && <a href={linkHref} class="section__link">{linkText}</a>}
+  </div>
+  <div class="product-grid">
+    {products.map((product) => (
+      <ProductCard product={product} />
+    ))}
+  </div>
+</section>
+
+<style>
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 5vw, 3.5rem) var(--space-4);
+  }
+  .section--tight { padding-top: 0; }
+  .section__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-6);
+  }
+  .section__eyebrow {
+    display: inline-block;
+    font-size: var(--text-xs);
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .section__title { margin: 0; font-size: clamp(1.4rem, 2.6vw, 1.85rem); font-weight: 900; }
+  .section__sub { margin: var(--space-2) 0 0; color: var(--text-muted); max-width: 56ch; line-height: 1.7; }
+  .section__link { color: var(--accent); font-weight: 800; text-decoration: none; white-space: nowrap; }
+  .product-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+</style>

@@ -1,0 +1,54 @@
+---
+import { formatJalaliYear } from "@repo/shared";
+import { getSiteSettings } from "../../lib/site-settings";
+
+const year = formatJalaliYear();
+const settings = getSiteSettings();
+---
+
+<footer style="background:#0f172a;color:#e2e8f0;margin-top:var(--space-8);padding:var(--space-8) var(--space-4);">
+  <div style="max-width:1200px;margin:0 auto;display:grid;gap:var(--space-8);grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+    <div>
+      <p style="margin:0 0 var(--space-3);font-weight:900;font-size:1.2rem;color:#fff;">{settings.siteName}</p>
+      <p style="margin:0;color:#94a3b8;font-size:var(--text-sm);line-height:1.7;">
+        {settings.siteDescription}
+      </p>
+    </div>
+    <div>
+      <p style="margin:0 0 var(--space-3);font-weight:800;color:#fff;">خرید</p>
+      <ul style="margin:0;padding:0;list-style:none;display:grid;gap:10px;color:#cbd5e1;font-size:var(--text-sm);">
+        <li><a href="#featured" style="color:inherit;text-decoration:none;">پرفروش‌ها</a></li>
+        <li><a href="/blog" style="color:inherit;text-decoration:none;">مجله سلامت</a></li>
+        <li><a href="/p/about" style="color:inherit;text-decoration:none;">دربارهٔ ما</a></li>
+        <li><a href="/p/contact" style="color:inherit;text-decoration:none;">تماس</a></li>
+        <li><span style="opacity:0.85;">پیگیری سفارش (به‌زودی)</span></li>
+      </ul>
+    </div>
+    <div>
+      <p style="margin:0 0 var(--space-3);font-weight:800;color:#fff;">اعتماد</p>
+      <ul style="margin:0;padding:0;list-style:none;display:grid;gap:10px;color:#cbd5e1;font-size:var(--text-sm);">
+        <li>ضمانت اصالت کالا</li>
+        <li>بسته‌بندی بهداشتی</li>
+        <li>پشتیبانی ۹ تا ۱۸</li>
+      </ul>
+    </div>
+    <div>
+      <p style="margin:0 0 var(--space-3);font-weight:800;color:#fff;">خبرنامه</p>
+      <p style="margin:0 0 var(--space-3);color:#94a3b8;font-size:var(--text-sm);">تخفیف‌ها و نکات سلامت را از دست ندهید.</p>
+      <form style="display:flex;gap:8px;flex-wrap:wrap;" onsubmit="event.preventDefault();">
+        <input
+          type="email"
+          dir="ltr"
+          placeholder="you@example.com"
+          style="flex:1;min-width:160px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:#e2e8f0;padding:10px 12px;font:inherit;"
+        />
+        <button type="submit" style="border:none;border-radius:10px;padding:10px 14px;background:#14b8a6;color:#0b1220;font-weight:800;cursor:pointer;font:inherit;">
+          عضویت
+        </button>
+      </form>
+    </div>
+  </div>
+  <div style="max-width:1200px;margin:var(--space-8) auto 0;padding-top:var(--space-6);border-top:1px solid #1e293b;color:#64748b;font-size:var(--text-xs);text-align:center;">
+    © {year} مدالینو — نمونه رابط فروشگاهی؛ پیش از خرید دارویی با داروساز مشورت کنید.
+  </div>
+</footer>

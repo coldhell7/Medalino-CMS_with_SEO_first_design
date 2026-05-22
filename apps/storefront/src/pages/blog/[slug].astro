@@ -1,0 +1,120 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import StoreHeader from "../../components/store/StoreHeader.astro";
+import StoreFooter from "../../components/store/StoreFooter.astro";
+import postsRaw from "@repo/cms/content/posts.json";
+import type { CmsPost } from "@repo/cms/types";
+import type { WithContext, BlogPosting, BreadcrumbList } from "schema-dts";
+import { formatJalaliDate } from "@repo/shared";
+import { absoluteUrl } from "../../data/catalog";
+
+export function getStaticPaths() {
+  const posts = postsRaw as CmsPost[];
+  return posts
+    .filter((p) => p.status === "publish")
+    .map((post) => ({
+      params: { slug: post.slug },
+      props: { post },
+    }));
+}
+
+interface Props {
+  post: CmsPost;
+}
+
+const { post } = Astro.props;
+
+const siteUrl = Astro.site ? String(Astro.site) : "https://localhost:4321";
+const canonicalUrl = new URL(`/blog/${post.slug}`, Astro.site ?? siteUrl).toString();
+const logoUrl = absoluteUrl(Astro.site, "/favicon.svg");
+const coverImage = post.coverImage
+  ? absoluteUrl(Astro.site, post.coverImage)
+  : logoUrl;
+
+const breadcrumb: WithContext<BreadcrumbList> = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "خانه", item: new URL("/", Astro.site).toString() },
+    { "@type": "ListItem", position: 2, name: "مجله", item: new URL("/blog", Astro.site).toString() },
+    { "@type": "ListItem", position: 3, name: post.title, item: canonicalUrl },
+  ],
+};
+
+const jsonLd: WithContext<BlogPosting> = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.title,
+  alternativeHeadline: (post.excerpt?.trim() ? post.excerpt : post.title).slice(0, 100),
+  datePublished: post.date,
+  dateModified: post.date,
+  inLanguage: "fa",
+  url: canonicalUrl,
+  description: post.excerpt,
+  articleBody: post.excerpt,
+  articleSection: post.categories?.[0],
+  keywords: post.categories?.join(", "),
+  image: coverImage,
+  author: { "@type": "Organization", name: "تحریریه مدالینو" },
+  publisher: {
+    "@type": "Organization",
+    name: "مدالینو",
+    logo: { "@type": "ImageObject", url: logoUrl },
+  },
+  mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
+};
+---
+
+<BaseLayout
+  title={`${post.title} | مجله مدالینو`}
+  description={post.excerpt}
+  canonicalPath={`/blog/${post.slug}`}
+  ogImage={coverImage}
+  extraLd={[
+    jsonLd as unknown as Record<string, unknown>,
+    breadcrumb as unknown as Record<string, unknown>,
+  ]}
+>
+  <StoreHeader />
+  <main style="max-width:720px;margin:0 auto;padding:var(--space-8);">
+    <nav style="font-size:var(--text-sm);">
+      <a href="/" style="color:var(--accent);text-decoration:none;">خانه</a>
+      <span style="color:var(--text-muted);"> / </span>
+      <a href="/blog" style="color:var(--accent);text-decoration:none;">مجله</a>
+    </nav>
+    <article style="margin-top:var(--space-6);">
+      <time datetime={post.date} style="font-size:var(--text-sm);color:var(--text-muted);">
+        {formatJalaliDate(post.date, { time: true })}
+      </time>
+      {post.coverImage ? (
+        <img
+          src={post.coverImage}
+          alt={post.title}
+          width="1200"
+          height="675"
+          loading="eager"
+          decoding="async"
+          style="width:100%;border-radius:var(--radius-lg);margin:var(--space-4) 0 var(--space-5);aspect-ratio:16/9;object-fit:cover;border:1px solid var(--border);"
+        />
+      ) : null}
+      <h1 style="margin:var(--space-3) 0 var(--space-4);font-size:1.75rem;line-height:1.35;">
+        {post.title}
+      </h1>
+      {post.categories?.length ? (
+        <p style="margin:0 0 var(--space-6);font-size:var(--text-sm);color:var(--text-muted);">
+          {post.categories.join(" · ")}
+        </p>
+      ) : null}
+      <div class="cms-body" set:html={post.body} />
+    </article>
+  </main>
+  <StoreFooter />
+</BaseLayout>
+
+<style is:global>
+  .cms-body p {
+    margin: var(--space-4) 0;
+    line-height: 1.85;
+    color: var(--text);
+  }
+</style>

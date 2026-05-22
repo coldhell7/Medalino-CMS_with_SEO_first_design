@@ -1,0 +1,250 @@
+[
+  {
+    "id": "b1",
+    "type": "hero",
+    "enabled": true,
+    "order": 1,
+    "data": {
+      "kicker": "سلامت شما اولویت ما نیست الکی",
+      "title": "از مکمل تا تجهیزات پزشکی؛ یک تجربهٔ خرید تمیز و مطمئن",
+      "lead": "مدالینو ترکیبی از کیفیت کالا، قیمت شفاف به تومان، و رابط فارسی RTL است.",
+      "image": "/images/hero-home.webp",
+      "imageAlt": "فروشگاه آنلاین مدالینو — مراقبت سلامت",
+      "badgeText": "پیشنهاد هفته",
+      "badgeDesc": "پکیج آبرسانی + الکترولیت — با مشورت پزشک",
+      "buttons": [
+        {
+          "label": "مشاهده منتخب محصولات",
+          "href": "#featured",
+          "variant": "primary"
+        },
+        {
+          "label": "مجله سلامت",
+          "href": "/blog",
+          "variant": "ghost"
+        },
+        {
+          "label": "درباره ما",
+          "href": "/p/about",
+          "variant": "ghost"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b2",
+    "type": "stats",
+    "enabled": true,
+    "order": 2,
+    "data": {
+      "title": "آمار مدالینو",
+      "items": [
+        {
+          "value": "۴۰٬۰۰۰+",
+          "label": "ارسال موفق"
+        },
+        {
+          "value": "۹۸٪",
+          "label": "رضایت خریداران"
+        },
+        {
+          "value": "۲۴h",
+          "label": "ارسال سریع تهران"
+        },
+        {
+          "value": "۵۰۰+",
+          "label": "محصول اصل"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b3",
+    "type": "trust",
+    "enabled": true,
+    "order": 3,
+    "data": {
+      "items": [
+        {
+          "icon": "🚚",
+          "title": "ارسال روزانه در تهران",
+          "desc": "سایر شهرها ۲ تا ۴ روز کاری"
+        },
+        {
+          "icon": "🛡️",
+          "title": "تضمین اصالت",
+          "desc": "رهگیری و فاکتور رسمی"
+        },
+        {
+          "icon": "💬",
+          "title": "پشتیبانی واقعی",
+          "desc": "۹ تا ۱۸ هر روز کاری"
+        },
+        {
+          "icon": "↩️",
+          "title": "۷ روز بازگشت کالا",
+          "desc": "کالای سالم و بازنشده"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b4",
+    "type": "categories",
+    "enabled": true,
+    "order": 4,
+    "data": {
+      "eyebrow": "کاوش سریع",
+      "title": "دسته‌های داغ این فصل",
+      "subtitle": "دسته‌های پرطرفدار با تصویر شاخص.",
+      "linkText": "رفتن به منتخب محصولات ←",
+      "linkHref": "#featured",
+      "items": [
+        {
+          "title": "مکمل و ویتامین",
+          "subtitle": "امگا، زینک، D3 و بیشتر",
+          "hue": 168,
+          "gid": "c1",
+          "coverImage": "/images/categories/supplements.webp"
+        },
+        {
+          "title": "مراقبت پوست",
+          "subtitle": "آبرسان، ترمیم و محافظت",
+          "hue": 320,
+          "gid": "c2",
+          "coverImage": "/images/categories/skincare.webp"
+        },
+        {
+          "title": "سلامت خانواده",
+          "subtitle": "کودک، بارداری و مراقبت",
+          "hue": 210,
+          "gid": "c3",
+          "coverImage": "/images/categories/family.webp"
+        },
+        {
+          "title": "تجهیزات پزشکی",
+          "subtitle": "اندازه‌گیری و مراقبت",
+          "hue": 12,
+          "gid": "c4",
+          "coverImage": "/images/categories/medical.webp"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b5",
+    "type": "mid_banner",
+    "enabled": true,
+    "order": 5,
+    "data": {
+      "image": "/images/banners/mid-banner.webp",
+      "title": "آماده‌اید برای یک روتین قوی‌تر؟",
+      "text": "مکمل، پوست و تجهیزات خانگی را یکجا ببینید.",
+      "buttonLabel": "شروع خرید",
+      "buttonHref": "#featured"
+    }
+  },
+  {
+    "id": "b6",
+    "type": "products",
+    "enabled": true,
+    "order": 6,
+    "data": {
+      "eyebrow": "ویژه",
+      "title": "محصولات ویژه",
+      "subtitle": "کالاهای منتخب با برچسب ویژه.",
+      "linkText": "همه محصولات ←",
+      "linkHref": "#featured",
+      "source": "featured"
+    }
+  },
+  {
+    "id": "b7",
+    "type": "products",
+    "enabled": true,
+    "order": 7,
+    "data": {
+      "eyebrow": "پرفروش‌ها",
+      "title": "منتخب محصولات",
+      "subtitle": "همه کالاهای منتشرشده با تصویر واقعی.",
+      "linkText": "",
+      "linkHref": "",
+      "source": "all"
+    }
+  },
+  {
+    "id": "b8",
+    "type": "media_press",
+    "enabled": true,
+    "order": 8,
+    "data": {
+      "eyebrow": "رسانه‌ها",
+      "title": "دیده شدیم در",
+      "subtitle": "بازتاب مدالینو در رسانه‌های معتبر",
+      "items": [
+        {
+          "name": "خبرگزاری سلامت",
+          "logo": "/images/press/health-news.png",
+          "url": "#",
+          "quote": "مدالینو، پلتفرم نوین فروش مکمل"
+        },
+        {
+          "name": "مجله زندگی سالم",
+          "logo": "/images/press/healthy-life.png",
+          "url": "#",
+          "quote": "تجربه خرید آنلاین مطمئن"
+        },
+        {
+          "name": "روزنامه پزشکان",
+          "logo": "/images/press/doctors-paper.png",
+          "url": "#",
+          "quote": "اصالت کالا، اولویت مدالینو"
+        },
+        {
+          "name": "سینا پزشکی",
+          "logo": "/images/press/sina-med.png",
+          "url": "#",
+          "quote": "فروشگاه مورد اعتماد پزشکان"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b9",
+    "type": "quotes",
+    "enabled": true,
+    "order": 9,
+    "data": {
+      "title": "صدای خریداران",
+      "items": [
+        {
+          "text": "بسته‌بندی تمیز و ارسال سریع — دقیقاً چیزی که برای مکمل‌های خانواده لازم داشتم.",
+          "author": "سارا · تهران"
+        },
+        {
+          "text": "رابط فارسی روان است؛ مقایسه قیمت‌ها راحت بود و پشتیبانی پاسخگو بود.",
+          "author": "امیر · شیراز"
+        },
+        {
+          "text": "برای کرم پوستی ابتدا شک داشتم، ولی کد رهگیری و اصالت کالا مشخص بود.",
+          "author": "مریم · اصفهان"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b10",
+    "type": "promo",
+    "enabled": true,
+    "order": 10,
+    "data": {
+      "title": "باشگاه مشتریان مدالینو",
+      "text": "با هر خرید امتیاز بگیرید؛ هدیه تولد، کوپن فصلی و دسترسی زودهنگام به حراج‌های ۲۴ ساعته.",
+      "image": "/images/banners/promo.webp",
+      "imageAlt": "یوگا و آرامش — باشگاه مشتریان",
+      "codeLabel": "کد هدیه اولین خرید",
+      "codeValue": "MEDALINO-10",
+      "codeHint": "تا سقف ۱۰٪ تخفیف روی سبد خرید غیرحراجی."
+    }
+  }
+]

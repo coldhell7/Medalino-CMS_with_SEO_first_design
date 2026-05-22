@@ -1,0 +1,221 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import StoreHeader from "../../components/store/StoreHeader.astro";
+import type { Product, Review, WithContext, BreadcrumbList, WebPage } from "schema-dts";
+import type { CmsProduct } from "@repo/cms/types";
+import { getProductBySlug, SAMPLE_PRODUCTS, formatToman, absoluteUrl } from "../../data/catalog";
+
+export function getStaticPaths() {
+  return SAMPLE_PRODUCTS.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const p = getProductBySlug(slug!);
+if (!p) {
+  throw new Error(`Unknown product slug: ${slug}`);
+}
+const priceIRR = String(p.priceToman * 10);
+const siteUrl = Astro.site ? String(Astro.site) : "https://localhost:4321";
+const productUrl = new URL(`/products/${p.slug}`, siteUrl).toString();
+const homeUrl = new URL("/", siteUrl).toString();
+const listingUrl = new URL("/#featured", siteUrl).toString();
+const ogImageAbs = absoluteUrl(Astro.site, p.image);
+const keywordsStr = p.keywords?.length ? p.keywords.join("، ") : undefined;
+
+function availabilityUrl(a: CmsProduct["availability"]): string {
+  if (a === "OutOfStock") return "https://schema.org/OutOfStock";
+  if (a === "PreOrder") return "https://schema.org/PreOrder";
+  return "https://schema.org/InStock";
+}
+
+const breadcrumb: WithContext<BreadcrumbList> = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "خانه", item: homeUrl },
+    { "@type": "ListItem", position: 2, name: "محصولات", item: listingUrl },
+    { "@type": "ListItem", position: 3, name: p.name, item: productUrl },
+  ],
+};
+
+const productLd: Record<string, unknown> = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: p.name,
+  description: p.summary,
+  sku: p.slug,
+  mpn: p.mpn,
+  inLanguage: "fa",
+  url: productUrl,
+  image: [ogImageAbs],
+  brand: { "@type": "Brand", name: p.brandName },
+  category: p.schemaCategory,
+  additionalProperty: [
+    { "@type": "PropertyValue", name: "واحد قیمت نمایشی", value: "تومان" },
+    { "@type": "PropertyValue", name: "شناسه", value: p.slug },
+  ],
+  offers: {
+    "@type": "Offer",
+    priceCurrency: "IRR",
+    price: priceIRR,
+    priceValidUntil: p.priceValidUntil,
+    availability: availabilityUrl(p.availability),
+    url: productUrl,
+    itemCondition: "https://schema.org/NewCondition",
+    seller: {
+      "@type": "Organization",
+      name: p.brandName,
+      url: siteUrl,
+    },
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: p.rating,
+    reviewCount: p.reviewCount,
+    bestRating: p.bestRating,
+    worstRating: p.worstRating,
+  },
+};
+
+if (p.gtin?.length === 13) {
+  productLd.gtin13 = p.gtin;
+} else if (p.gtin?.length === 8) {
+  productLd.gtin8 = p.gtin;
+}
+
+const product = productLd as unknown as WithContext<Product>;
+
+const review: WithContext<Review> = {
+  "@context": "https://schema.org",
+  "@type": "Review",
+  inLanguage: "fa",
+  reviewBody: p.reviewBody,
+  author: { "@type": "Person", name: p.reviewAuthor },
+  reviewRating: {
+    "@type": "Rating",
+    ratingValue: p.reviewRatingValue,
+    bestRating: p.bestRating,
+    worstRating: p.worstRating,
+  },
+  itemReviewed: { "@type": "Product", name: p.name, url: productUrl },
+};
+
+const webPage: WithContext<WebPage> = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: p.metaTitle,
+  description: p.metaDescription,
+  url: productUrl,
+  inLanguage: "fa",
+  primaryImageOfPage: { "@type": "ImageObject", url: ogImageAbs },
+  isPartOf: { "@type": "WebSite", name: "مدالینو", url: siteUrl },
+};
+---
+
+<BaseLayout
+  title={p.metaTitle}
+  description={p.metaDescription}
+  canonicalPath={`/products/${p.slug}`}
+  keywords={keywordsStr}
+  ogTitle={p.ogTitle ?? p.metaTitle}
+  ogDescription={p.ogDescription ?? p.metaDescription}
+  ogImage={ogImageAbs}
+  ogType="product"
+  extraLd={[
+    product as unknown as Record<string, unknown>,
+    review as unknown as Record<string, unknown>,
+    breadcrumb as unknown as Record<string, unknown>,
+    webPage as unknown as Record<string, unknown>,
+  ]}
+>
+  <StoreHeader />
+  <main style="max-width:1120px;margin:0 auto;padding:var(--space-8) var(--space-4);display:grid;gap:var(--space-8);">
+    <nav style="font-size:var(--text-sm);color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;">
+      <a href="/" style="color:var(--accent);text-decoration:none;">خانه</a>
+      <span aria-hidden="true">/</span>
+      <a href="/#featured" style="color:var(--accent);text-decoration:none;">محصولات</a>
+      <span aria-hidden="true">/</span>
+      <span style="color:var(--text);">{p.name}</span>
+    </nav>
+
+    <div style="display:grid;gap:var(--space-8);grid-template-columns:1.05fr 0.95fr;align-items:start;" class="pdp-grid">
+      <div style="border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);background:var(--bg-muted);">
+        <img
+          src={p.image}
+          alt={p.imageAlt}
+          width="960"
+          height="960"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          referrerpolicy="no-referrer-when-downgrade"
+          style="width:100%;display:block;aspect-ratio:1/1;object-fit:cover;"
+        />
+      </div>
+      <div>
+        {
+          p.badge ? (
+            <span
+              style="display:inline-block;margin-bottom:10px;background:#ecfdf5;color:#047857;font-weight:800;font-size:var(--text-xs);padding:6px 12px;border-radius:999px;border:1px solid #a7f3d0;"
+            >
+              {p.badge}
+            </span>
+          ) : null
+        }
+        <h1 style="margin:0 0 var(--space-3);font-size:clamp(1.6rem,3vw,2.1rem);line-height:1.25;font-weight:900;">
+          {p.name}
+        </h1>
+        <p style="margin:0 0 var(--space-4);color:var(--text-muted);font-size:var(--text-lg);line-height:1.75;">
+          {p.summary}
+        </p>
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:var(--space-4);">
+          <span style="font-size:2rem;font-weight:900;">{formatToman(p.priceToman)}</span>
+          <span style="color:var(--text-muted);font-size:var(--text-sm);">
+            ★ {p.rating.toLocaleString("fa-IR")} از {p.bestRating.toLocaleString("fa-IR")} —{" "}
+            {p.reviewCount.toLocaleString("fa-IR")} نظر
+          </span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button
+            type="button"
+            style="border:none;border-radius:14px;padding:14px 22px;background:var(--accent);color:var(--accent-foreground);font-weight:900;font:inherit;cursor:pointer;"
+          >
+            افزودن به سبد
+          </button>
+          <a
+            href="/#featured"
+            style="display:inline-flex;align-items:center;border-radius:14px;padding:14px 22px;border:1px solid var(--border);font-weight:800;text-decoration:none;color:var(--text);background:var(--bg);"
+          >
+            ادامه خرید
+          </a>
+        </div>
+        {
+          p.bodyHtml ? (
+            <div class="cms-body" style="margin-top:var(--space-6);" set:html={p.bodyHtml} />
+          ) : null
+        }
+        <ul style="margin:var(--space-6) 0 0;padding-inline-start:1.1rem;color:var(--text-muted);line-height:1.9;font-size:var(--text-sm);">
+          <li>ارسال سریع و بسته‌بندی بهداشتی</li>
+          <li>ضمانت اصالت و گارانتی نمایندگی</li>
+          <li>مشاوره قبل از خرید دارویی (غیرفعال در نمونه)</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .cms-body p {
+    margin: var(--space-3) 0;
+    line-height: 1.85;
+    color: var(--text);
+  }
+</style>
+
+<style>
+  @media (max-width: 900px) {
+    .pdp-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>

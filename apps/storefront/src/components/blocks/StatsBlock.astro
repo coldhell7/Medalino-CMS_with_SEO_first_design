@@ -1,0 +1,62 @@
+---
+export interface Props {
+  title: string;
+  items: Array<{ value: string; label: string }>;
+}
+
+const { title, items } = Astro.props;
+---
+
+<section class="stats">
+  <div class="stats__inner">
+    <h2 class="stats__title">{title}</h2>
+    <div class="stats__grid">
+      {items.map((item) => (
+        <div class="stat">
+          <span class="stat__num">{item.value}</span>
+          <span class="stat__lbl">{item.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .stats {
+    background: linear-gradient(135deg, #f0fdf4, #f0f9ff);
+    border-block: 1px solid var(--border);
+    padding: clamp(2rem, 4vw, 3rem) var(--space-4);
+  }
+  .stats__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .stats__title {
+    margin: 0 0 var(--space-6);
+    font-size: clamp(1.2rem, 2vw, 1.5rem);
+    font-weight: 800;
+    color: var(--text-muted);
+  }
+  .stats__grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(1.5rem, 5vw, 3rem);
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+  }
+  .stat__num {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 900;
+    color: var(--accent);
+  }
+  .stat__lbl {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+</style>

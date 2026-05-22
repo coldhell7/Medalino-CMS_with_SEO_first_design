@@ -1,0 +1,66 @@
+/**
+ * Design tokens — admin + storefront alignment (2026 baseline).
+ * Load Vazirmatn in each app: import "@fontsource-variable/vazirmatn/index.css" before this file.
+ */
+:root {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-1: 0 1px 2px rgb(15 23 42 / 0.06);
+  --shadow-2: 0 8px 24px rgb(15 23 42 / 0.08);
+  --font-sans: "Vazirmatn Variable", Vazirmatn, ui-sans-serif, system-ui, sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+}
+
+[data-theme="admin"] {
+  color-scheme: light dark;
+  --bg: #0b1220;
+  --bg-elevated: #111827;
+  --surface: #151f33;
+  --border: rgb(148 163 184 / 0.18);
+  --text: #e5e7eb;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-foreground: #0b1220;
+  --success: #34d399;
+  --warning: #fbbf24;
+}
+
+@media (prefers-color-scheme: light) {
+  [data-theme="admin"] {
+    --bg: #f8fafc;
+    --bg-elevated: #ffffff;
+    --surface: #ffffff;
+    --border: rgb(15 23 42 / 0.1);
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --accent: #0284c7;
+    --accent-foreground: #ffffff;
+  }
+}
+
+[data-theme="storefront"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-muted: #f1f5f9;
+  --text: #0f172a;
+  --text-muted: #475569;
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --border: rgb(15 23 42 / 0.08);
+}
+
+html[dir="rtl"] body {
+  line-height: 1.65;
+}

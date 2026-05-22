@@ -1,0 +1,18 @@
+[Unit]
+Description=Medalino Admin (Next.js)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/medalino/src/apps/admin
+Environment=NODE_ENV=production
+Environment=PORT=3002
+Environment=HOSTNAME=127.0.0.1
+Environment=NEXT_PUBLIC_STOREFRONT_URL=https://medalino.ir
+ExecStart=/usr/bin/node /opt/medalino/src/node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3002
+Restart=on-failure
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
