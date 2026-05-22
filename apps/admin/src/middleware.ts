@@ -25,6 +25,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/api/seo/og-preview")) return NextResponse.next();
   if (pathname.startsWith("/api/seo/webp-convert")) return NextResponse.next();
   if (pathname.startsWith("/api/indexing")) return NextResponse.next();
+  if (pathname.startsWith("/api/orders-demo")) return NextResponse.next();
 
   const token = request.cookies.get("admin_session")?.value ?? "";
   if (!token || !(await verifySessionValue(token))) {

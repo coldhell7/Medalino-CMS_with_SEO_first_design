@@ -2,13 +2,11 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import StoreHeader from "../components/store/StoreHeader.astro";
 import StoreFooter from "../components/store/StoreFooter.astro";
-import { getAdminUrl } from "../lib/admin-url";
-const adminUrl = getAdminUrl();
 ---
 
 <BaseLayout title="سبد خرید | مدالینو" canonicalPath="/cart">
   <StoreHeader />
-  <main style="max-width: 900px; margin: 0 auto; padding: var(--space-8) var(--space-4);" data-admin-url={adminUrl}>
+  <main style="max-width: 900px; margin: 0 auto; padding: var(--space-8) var(--space-4);">
     <h1 style="font-size: var(--text-2xl); font-weight: 900; margin: 0 0 var(--space-6);">سبد خرید</h1>
     <div id="cart-contents">
       <p style="color: var(--text-muted);">در حال بارگذاری…</p>
@@ -156,8 +154,7 @@ const adminUrl = getAdminUrl();
       btn.textContent = "در حال ثبت…";
 
       try {
-        const adminUrl = document.querySelector("main")!.getAttribute("data-admin-url")!;
-        const res = await fetch(`${adminUrl}/api/orders-demo`, {
+        const res = await fetch(`/api/orders-demo`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
