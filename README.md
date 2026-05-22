@@ -27,8 +27,6 @@ Production (server)
 2. Run the admin on port `3002` and proxy via Nginx at `https://admin.medalino.ir`
 
 Environment variables
-- `ADMIN_USERNAME` — admin username
-- `ADMIN_PASSWORD` — admin password
 - `ADMIN_AUTH_SECRET` — long secret used to sign session tokens
 - `PUBLIC_ADMIN_URL` — e.g. `https://admin.medalino.ir`
 - `PUBLIC_SITE_URL` — e.g. `https://medalino.ir`
