@@ -9,8 +9,11 @@ import { formatJalaliDate } from "@repo/shared";
 export default function CmsPagesListPage() {
   const [pages, setPages] = useState<CmsPage[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
     void (async () => {
       try {
         const res = await fetch("/api/cms/pages");
@@ -19,6 +22,8 @@ export default function CmsPagesListPage() {
         else setPages(j.pages ?? []);
       } catch (e) {
         setErr(e instanceof Error ? e.message : String(e));
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
@@ -42,34 +47,42 @@ export default function CmsPagesListPage() {
       </div>
       {err ? <p className="text-sm text-red-400">{err}</p> : null}
       <Surface title="فهرست">
-        <table className="w-full text-start text-sm">
-          <thead>
-            <tr>
-              <th className="pb-2">عنوان</th>
-              <th className="pb-2">نامک</th>
-              <th className="pb-2">وضعیت</th>
-              <th className="pb-2">تاریخ</th>
-              <th className="pb-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {pages.map((p) => (
-              <tr key={p.id} className="border-t" style={{ borderColor: "var(--border)" }}>
-                <td className="py-2 font-medium">{p.title}</td>
-                <td className="py-2 font-mono text-xs">{p.slug}</td>
-                <td className="py-2">{p.status === "publish" ? "منتشر" : "پیش‌نویس"}</td>
-                <td className="py-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                  {formatJalaliDate(p.date, { time: true })}
-                </td>
-                <td className="py-2">
-                  <Link href={`/cms/pages/${p.id}/edit`} className="font-bold no-underline" style={{ color: "var(--accent)" }}>
-                    ویرایش
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {loading ? (
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>در حال بارگذاری…</p>
+        ) : pages.length === 0 ? (
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>هنوز برگه‌ای ثبت نشده.</p>
+        ) : (
+          <div className="overflow-auto">
+            <table className="w-full text-start text-sm">
+              <thead>
+                <tr>
+                  <th className="pb-2">عنوان</th>
+                  <th className="pb-2">نامک</th>
+                  <th className="pb-2">وضعیت</th>
+                  <th className="pb-2">تاریخ</th>
+                  <th className="pb-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {pages.map((p) => (
+                  <tr key={p.id} className="border-t" style={{ borderColor: "var(--border)" }}>
+                    <td className="py-2 font-medium">{p.title}</td>
+                    <td className="py-2 font-mono text-xs">{p.slug}</td>
+                    <td className="py-2">{p.status === "publish" ? "منتشر" : "پیش‌نویس"}</td>
+                    <td className="py-2 text-xs" style={{ color: "var(--text-muted)" }}>
+                      {hydrated ? formatJalaliDate(p.date, { time: true }) : p.date}
+                    </td>
+                    <td className="py-2">
+                      <Link href={`/cms/pages/${p.id}/edit`} className="font-bold no-underline" style={{ color: "var(--accent)" }}>
+                        ویرایش
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Surface>
     </div>
   );

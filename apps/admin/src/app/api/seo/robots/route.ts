@@ -2,6 +2,38 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+import fs from "node:fs";
+import path from "node:path";
+
+const SEO_FILE = path.join(process.cwd(), ".data", "seo-settings.json");
+const DEFAULTS_ROBOTS = `User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+Sitemap: https://medalino.ir/sitemap.xml`;
+
+function loadRobotsContent(): string {
+  try {
+    if (!fs.existsSync(SEO_FILE)) return DEFAULTS_ROBOTS;
+    const raw = fs.readFileSync(SEO_FILE, "utf8");
+    const parsed = JSON.parse(raw) as { robotsTxt?: string };
+    return parsed.robotsTxt?.trim() || DEFAULTS_ROBOTS;
+  } catch {
+    return DEFAULTS_ROBOTS;
+  }
+}
+
+export async function GET() {
+  const content = loadRobotsContent();
+  return new Response(content, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
+    },
+  });
+}
+
 type ValidationIssue = {
   line: number;
   message: string;

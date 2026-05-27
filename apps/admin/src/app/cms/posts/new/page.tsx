@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Surface } from "@repo/ui/react";
 import RichEditor from "@/components/RichEditor";
 import ImageUploader from "@/components/ImageUploader";
+import AiMetaButton from "@/components/AiMetaButton";
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -84,6 +85,18 @@ export default function NewPostPage() {
       </div>
 
       {msg && <p className="text-sm text-red-400">{msg}</p>}
+
+      <AiMetaButton
+        title={title}
+        body={body}
+        keywords={categories}
+        endpoint="/api/ai/content"
+        onMetaTitle={setMetaTitle}
+        onMetaDescription={setMetaDescription}
+        onSlug={setSlug}
+        onBody={setBody}
+        onExcerpt={setExcerpt}
+      />
 
       <div className="grid gap-6 md:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-6">

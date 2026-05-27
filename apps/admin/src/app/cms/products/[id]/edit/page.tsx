@@ -1,17 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CmsProductForm } from "@/components/CmsProductForm";
+import { Surface } from "@repo/ui/react";
+import RichEditor from "@/components/RichEditor";
+import ImageUploader from "@/components/ImageUploader";
+import AiMetaButton from "@/components/AiMetaButton";
 import type { CmsProduct } from "@repo/cms/types";
 
 export default function EditProductPage() {
   const params = useParams();
+  const router = useRouter();
   const id = String(params.id ?? "");
-  const [product, setProduct] = useState<CmsProduct | null>(null);
+
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [summary, setSummary] = useState("");
+  const [bodyHtml, setBodyHtml] = useState("<p></p>");
+  const [status, setStatus] = useState<"draft" | "publish">("draft");
+  const [featured, setFeatured] = useState(false);
+  const [priceToman, setPriceToman] = useState("");
+  const [originalPriceToman, setOriginalPriceToman] = useState("");
+  const [badge, setBadge] = useState("");
+  const [availability, setAvailability] = useState<"InStock" | "OutOfStock" | "PreOrder">("InStock");
+  const [image, setImage] = useState("");
+  const [imageAlt, setImageAlt] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+
   const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const autoSlug = (t: string) => t.toLowerCase().replace(/\s+/g, "-").replace(/[^\w\u0600-\u06FF-]/g, "");
 
   useEffect(() => {
     void (async () => {
@@ -23,7 +47,22 @@ export default function EditProductPage() {
           setLoading(false);
           return;
         }
-        setProduct(j.product as CmsProduct);
+        const p = j.product as CmsProduct;
+        setName(p.name);
+        setSlug(p.slug);
+        setSummary(p.summary);
+        setBodyHtml(p.bodyHtml ?? "<p></p>");
+        setStatus(p.status);
+        setFeatured(p.featured ?? false);
+        setPriceToman(String(p.priceToman));
+        setOriginalPriceToman(p.originalPriceToman ? String(p.originalPriceToman) : "");
+        setBadge(p.badge ?? "");
+        setAvailability(p.availability);
+        setImage(p.image);
+        setImageAlt(p.imageAlt);
+        setMetaTitle(p.metaTitle);
+        setMetaDescription(p.metaDescription);
+        setLoaded(true);
       } catch (e) {
         setMsg(e instanceof Error ? e.message : String(e));
       } finally {
@@ -32,19 +71,292 @@ export default function EditProductPage() {
     })();
   }, [id]);
 
+  const save = async () => {
+    setSaving(true);
+    setMsg(null);
+    try {
+      const body: Record<string, unknown> = {
+        name,
+        slug: slug || autoSlug(name),
+        summary,
+        bodyHtml,
+        status,
+        featured,
+        priceToman: parseInt(priceToman) || 0,
+        availability,
+        image: image || undefined,
+        imageAlt: imageAlt || name,
+        metaTitle: metaTitle || name,
+        metaDescription: metaDescription || summary,
+      };
+      if (originalPriceToman) body.originalPriceToman = parseInt(originalPriceToman);
+      if (badge) body.badge = badge;
+
+      const res = await fetch(`/api/cms/products/${id}`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const j = await res.json();
+      if (!res.ok) { setMsg(j.message ?? "خطا"); return; }
+      router.push("/cms/products");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveDraft = async () => {
+    setSaving(true);
+    setMsg(null);
+    setSaveSuccess(false);
+    try {
+      const body: Record<string, unknown> = {
+        name,
+        slug: slug || autoSlug(name),
+        summary,
+        bodyHtml,
+        status,
+        featured,
+        priceToman: parseInt(priceToman) || 0,
+        availability,
+        image: image || undefined,
+        imageAlt: imageAlt || name,
+        metaTitle: metaTitle || name,
+        metaDescription: metaDescription || summary,
+      };
+      if (originalPriceToman) body.originalPriceToman = parseInt(originalPriceToman);
+      if (badge) body.badge = badge;
+
+      const res = await fetch(`/api/cms/products/${id}`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const j = await res.json();
+      if (!res.ok) { setMsg(j.message ?? "خطا"); return; }
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <p className="p-8 text-sm">در حال بارگذاری…</p>;
-  if (!product && msg) return <p className="p-8 text-sm text-red-400">{msg}</p>;
-  if (!product) return null;
+  if (!loaded && msg) return <p className="p-8 text-sm text-red-400">{msg}</p>;
+  if (!loaded) return null;
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
-      <div className="flex items-center gap-4">
-        <Link href="/cms/products" className="text-sm font-bold no-underline" style={{ color: "var(--accent)" }}>
-          ← بازگشت
-        </Link>
-        <h1 className="text-2xl font-semibold">ویرایش محصول</h1>
+    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/cms/products" className="text-sm font-bold no-underline" style={{ color: "var(--accent)" }}>
+            ← بازگشت
+          </Link>
+          <h1 className="text-2xl font-semibold">ویرایش محصول</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            className="rounded-md border p-2 text-sm"
+            style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+            value={status}
+            onChange={(e) => setStatus(e.target.value as "draft" | "publish")}
+          >
+            <option value="draft">پیش‌نویس</option>
+            <option value="publish">منتشر شده</option>
+          </select>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void saveDraft()}
+            className="rounded-md px-4 py-2 text-sm font-bold"
+            style={{ border: "1px solid var(--border)", background: "transparent", color: "var(--text)" }}
+          >
+            {saving ? "در حال ذخیره…" : "ذخیره"}
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void save()}
+            className="rounded-md px-6 py-2 text-sm font-bold text-white"
+            style={{ background: "var(--accent)" }}
+          >
+            {saving ? "در حال ذخیره…" : "انتشار"}
+          </button>
+        </div>
       </div>
-      <CmsProductForm productId={product.id} initial={product} onCancelHref="/cms/products" />
+
+      {saveSuccess && (
+        <p className="rounded-md bg-green-600/20 px-4 py-2 text-sm font-bold text-green-400">
+          ✓ ذخیره شد
+        </p>
+      )}
+      {msg && !saveSuccess && <p className="text-sm text-red-400">{msg}</p>}
+
+      <AiMetaButton
+        title={name}
+        body={bodyHtml}
+        endpoint="/api/ai/product"
+        onMetaTitle={setMetaTitle}
+        onMetaDescription={setMetaDescription}
+        onSlug={setSlug}
+        onBody={(v) => setBodyHtml(v)}
+        onExcerpt={setSummary}
+      />
+
+      <div className="grid gap-6 md:grid-cols-[1fr_320px]">
+        <div className="flex flex-col gap-6">
+          <Surface title="نام محصول">
+            <input
+              className="w-full rounded-md border p-3 text-lg font-semibold"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+              value={name}
+              onChange={(e) => { setName(e.target.value); if (!slug) setSlug(autoSlug(e.target.value)); }}
+              placeholder="نام محصول را وارد کنید…"
+            />
+          </Surface>
+
+          <Surface title="محتوا">
+            <RichEditor value={bodyHtml} onChange={setBodyHtml} placeholder="محتوای محصول را بنویسید…" />
+          </Surface>
+
+          <Surface title="خلاصه">
+            <textarea
+              className="w-full rounded-md border p-3 text-sm"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+              rows={3}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              placeholder="خلاصه کوتاه برای نمایش در لیست…"
+            />
+          </Surface>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <Surface title="تنظیمات انتشار">
+            <div className="flex flex-col gap-4">
+              <label className="text-sm font-medium">
+                نامک (slug)
+                <input
+                  className="mt-1 w-full rounded-md border p-2 text-sm font-mono"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="example-slug"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  checked={featured}
+                  onChange={(e) => setFeatured(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                محصول ویژه
+              </label>
+            </div>
+          </Surface>
+
+          <Surface title="قیمت و تخفیف">
+            <div className="flex flex-col gap-4">
+              <label className="text-sm font-medium">
+                قیمت (تومان)
+                <input
+                  className="mt-1 w-full rounded-md border p-2 text-sm font-mono"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  type="number"
+                  value={priceToman}
+                  onChange={(e) => setPriceToman(e.target.value)}
+                  placeholder="۰"
+                />
+              </label>
+              <label className="text-sm font-medium">
+                قیمت قدیم (تومان)
+                <input
+                  className="mt-1 w-full rounded-md border p-2 text-sm font-mono"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  type="number"
+                  value={originalPriceToman}
+                  onChange={(e) => setOriginalPriceToman(e.target.value)}
+                  placeholder="۰"
+                />
+              </label>
+              <label className="text-sm font-medium">
+                برچسب
+                <input
+                  className="mt-1 w-full rounded-md border p-2 text-sm"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  value={badge}
+                  onChange={(e) => setBadge(e.target.value)}
+                  placeholder="تخفیف ویژه"
+                />
+              </label>
+            </div>
+          </Surface>
+
+          <Surface title="موجودی">
+            <select
+              className="w-full rounded-md border p-2 text-sm"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value as typeof availability)}
+            >
+              <option value="InStock">موجود</option>
+              <option value="OutOfStock">ناموجود</option>
+              <option value="PreOrder">پیش‌فروش</option>
+            </select>
+          </Surface>
+
+          <Surface title="تصویر">
+            <ImageUploader value={image} onChange={setImage} label="" size="medium" />
+            <label className="mt-3 block text-sm font-medium">
+              متن جایگزین
+              <input
+                className="mt-1 w-full rounded-md border p-2 text-sm"
+                style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                value={imageAlt}
+                onChange={(e) => setImageAlt(e.target.value)}
+                placeholder={name || "توضیح تصویر…"}
+              />
+            </label>
+          </Surface>
+
+          <Surface title="سئو">
+            <div className="flex flex-col gap-4">
+              <label className="text-sm font-medium">
+                عنوان سئو
+                <input
+                  className="mt-1 w-full rounded-md border p-2 text-sm"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  value={metaTitle}
+                  onChange={(e) => setMetaTitle(e.target.value)}
+                  placeholder={name || "عنوان سئو…"}
+                />
+                <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                  {(metaTitle || name).length}/60
+                </p>
+              </label>
+              <label className="text-sm font-medium">
+                توضیحات متا
+                <textarea
+                  className="mt-1 w-full rounded-md border p-2 text-sm"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  rows={3}
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  placeholder={summary || "توضیحات متا…"}
+                />
+                <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                  {(metaDescription || summary).length}/160
+                </p>
+              </label>
+            </div>
+          </Surface>
+        </div>
+      </div>
     </div>
   );
 }

@@ -6,9 +6,12 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Legend,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -49,8 +52,17 @@ function dwellBarWidth(seconds: number, max: number): string {
   return `${Math.max(8, Math.round((seconds / max) * 100))}%`;
 }
 
+type DashboardStats = {
+  products: { total: number; published: number; draft: number };
+  posts: { total: number; published: number; draft: number };
+  pages: { total: number; published: number; draft: number };
+  tokenUsage: Record<string, { promptTokens: number; completionTokens: number; totalTokens: number; requests: number }>;
+  tokenTotals: { promptTokens: number; completionTokens: number; totalTokens: number; requests: number };
+};
+
 export function DashboardReports({ dbOrderCount }: { dbOrderCount: number | null }) {
   const [hydrated, setHydrated] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const analytics = useMemo(() => getDashboardAnalytics(), []);
   const maxDwell = useMemo(
     () => Math.max(...analytics.pageDwell.map((p) => p.avgSeconds), 1),
@@ -68,6 +80,15 @@ export function DashboardReports({ dbOrderCount }: { dbOrderCount: number | null
         if (j.ok && j.orders) setOrders(j.orders);
       } catch {
         setOrders([]);
+      }
+    })();
+    void (async () => {
+      try {
+        const res = await fetch("/api/dashboard/stats");
+        const j = await res.json();
+        if (j.ok) setStats(j as DashboardStats);
+      } catch {
+        // ignore
       }
     })();
   }, []);
@@ -90,8 +111,120 @@ export function DashboardReports({ dbOrderCount }: { dbOrderCount: number | null
 
   const fmt = (n: number) => hydrated ? n.toLocaleString("fa-IR") : String(n);
 
+  const tokenColors: Record<string, string> = {
+    gemini: "#4285F4",
+    openrouter: "#FF6B35",
+    deepseek: "#4F46E5",
+  };
+
+  const tokenPieData = stats
+    ? Object.entries(stats.tokenUsage).map(([provider, u]) => ({
+        name: provider === "gemini" ? "Gemini" : provider === "openrouter" ? "OpenRouter" : "DeepSeek",
+        value: u.totalTokens,
+        color: tokenColors[provider] || "#6B7280",
+      }))
+    : [];
+
   return (
     <div className="flex flex-col gap-6">
+      {stats && (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-xl border px-4 py-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+              <p className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>محصولات</p>
+              <p className="mt-2 text-2xl font-black" style={{ color: "var(--accent)" }}>{fmt(stats.products.total)}</p>
+              <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                {fmt(stats.products.published)} منتشر · {fmt(stats.products.draft)} پیش‌نویس
+              </p>
+            </div>
+            <div className="rounded-xl border px-4 py-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+              <p className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>نوشته‌ها</p>
+              <p className="mt-2 text-2xl font-black" style={{ color: "var(--accent)" }}>{fmt(stats.posts.total)}</p>
+              <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                {fmt(stats.posts.published)} منتشر · {fmt(stats.posts.draft)} پیش‌نویس
+              </p>
+            </div>
+            <div className="rounded-xl border px-4 py-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+              <p className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>برگه‌ها</p>
+              <p className="mt-2 text-2xl font-black" style={{ color: "var(--accent)" }}>{fmt(stats.pages.total)}</p>
+              <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                {fmt(stats.pages.published)} منتشر · {fmt(stats.pages.draft)} پیش‌نویس
+              </p>
+            </div>
+            <div className="rounded-xl border px-4 py-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+              <p className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>درخواست‌های AI</p>
+              <p className="mt-2 text-2xl font-black" style={{ color: "var(--accent)" }}>{fmt(stats.tokenTotals.requests)}</p>
+              <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                {fmt(stats.tokenTotals.totalTokens)} توکن مصرفی
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <Surface title="توکن مصرف‌شده به تفکیک سرویس">
+              <div className="h-64 w-full">
+                {tokenPieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={tokenPieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={4}
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, value }) => `${name}: ${fmt(value)}`}
+                      >
+                        {tokenPieData.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value: number) => fmt(value)}
+                        contentStyle={{
+                          background: "var(--surface)",
+                          border: "1px solid var(--border)",
+                          color: "var(--text)",
+                          borderRadius: 8,
+                          direction: "rtl",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>هیچ فعالیت AI ثبت نشده است.</p>
+                  </div>
+                )}
+              </div>
+            </Surface>
+
+            <Surface title="جزئیات مصرف API">
+              <div className="space-y-3">
+                {Object.entries(stats.tokenUsage).length > 0 ? (
+                  Object.entries(stats.tokenUsage).map(([provider, u]) => (
+                    <div key={provider} className="rounded-lg border p-3" style={{ borderColor: "var(--border)" }}>
+                      <p className="text-sm font-bold" style={{ color: tokenColors[provider] || "var(--text)" }}>
+                        {provider === "gemini" ? "Google Gemini" : provider === "openrouter" ? "OpenRouter" : "DeepSeek"}
+                      </p>
+                      <div className="mt-2 grid grid-cols-3 gap-2 text-xs" style={{ color: "var(--text-muted)" }}>
+                        <span>{fmt(u.requests)} درخواست</span>
+                        <span>{fmt(u.promptTokens)} توکن ورودی</span>
+                        <span>{fmt(u.completionTokens)} توکن خروجی</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>هیچ فعالیت AI ثبت نشده است.</p>
+                )}
+              </div>
+            </Surface>
+          </div>
+        </>
+      )}
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "بازدید صفحه", value: analytics.visits, hint: analytics.periodLabel },

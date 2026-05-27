@@ -98,35 +98,39 @@
       "title": "دسته‌های داغ این فصل",
       "subtitle": "دسته‌های پرطرفدار با تصویر شاخص.",
       "linkText": "رفتن به منتخب محصولات ←",
-      "linkHref": "#featured",
+      "linkHref": "/categories",
       "items": [
         {
           "title": "مکمل و ویتامین",
           "subtitle": "امگا، زینک، D3 و بیشتر",
           "hue": 168,
           "gid": "c1",
-          "coverImage": "/images/categories/supplements.webp"
+          "coverImage": "/images/categories/supplements.webp",
+          "href": "/search?q=مکمل"
         },
         {
           "title": "مراقبت پوست",
           "subtitle": "آبرسان، ترمیم و محافظت",
           "hue": 320,
           "gid": "c2",
-          "coverImage": "/images/categories/skincare.webp"
+          "coverImage": "/images/categories/skincare.webp",
+          "href": "/search?q=مراقبت+پوست"
         },
         {
           "title": "سلامت خانواده",
           "subtitle": "کودک، بارداری و مراقبت",
           "hue": 210,
           "gid": "c3",
-          "coverImage": "/images/categories/family.webp"
+          "coverImage": "/images/categories/family.webp",
+          "href": "/search?q=خانواده"
         },
         {
           "title": "تجهیزات پزشکی",
           "subtitle": "اندازه‌گیری و مراقبت",
           "hue": 12,
           "gid": "c4",
-          "coverImage": "/images/categories/medical.webp"
+          "coverImage": "/images/categories/medical.webp",
+          "href": "/search?q=تجهیزات+پزشکی"
         }
       ]
     }
@@ -141,7 +145,7 @@
       "title": "آماده‌اید برای یک روتین قوی‌تر؟",
       "text": "مکمل، پوست و تجهیزات خانگی را یکجا ببینید.",
       "buttonLabel": "شروع خرید",
-      "buttonHref": "#featured"
+      "buttonHref": "/categories"
     }
   },
   {
@@ -165,7 +169,7 @@
       "title": "محصولات ویژه",
       "subtitle": "کالاهای منتخب با برچسب ویژه.",
       "linkText": "همه محصولات ←",
-      "linkHref": "#featured",
+      "linkHref": "/products",
       "source": "featured"
     }
   },
@@ -196,25 +200,25 @@
         {
           "name": "خبرگزاری سلامت",
           "logo": "/images/press/health-news.png",
-          "url": "#",
+          "url": "/press",
           "quote": "مدالینو، پلتفرم نوین فروش مکمل"
         },
         {
           "name": "مجله زندگی سالم",
           "logo": "/images/press/healthy-life.png",
-          "url": "#",
+          "url": "/press",
           "quote": "تجربه خرید آنلاین مطمئن"
         },
         {
           "name": "روزنامه پزشکان",
           "logo": "/images/press/doctors-paper.png",
-          "url": "#",
+          "url": "/press",
           "quote": "اصالت کالا، اولویت مدالینو"
         },
         {
           "name": "سینا پزشکی",
           "logo": "/images/press/sina-med.png",
-          "url": "#",
+          "url": "/press",
           "quote": "فروشگاه مورد اعتماد پزشکان"
         }
       ]

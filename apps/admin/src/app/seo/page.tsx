@@ -205,7 +205,7 @@ function Btn({ children, onClick, disabled, variant = "primary" }: { children: R
   );
 }
 
-type TabId = "overview" | "analyzer" | "settings" | "sitemap" | "robots" | "indexing" | "audit" | "keywords" | "ogpreview" | "webp";
+type TabId = "overview" | "analyzer" | "settings" | "sitemap" | "robots" | "indexing" | "audit" | "keywords" | "ogpreview" | "webp" | "content";
 
 const STOREFRONT_URL = process.env.NEXT_PUBLIC_STOREFRONT_URL ?? "https://medalino.ir";
 
@@ -230,6 +230,7 @@ export default function SeoPage() {
     { id: "keywords", label: "کلمات کلیدی" },
     { id: "ogpreview", label: "پیش‌نمایش OG" },
     { id: "webp", label: "تبدیل WebP" },
+    { id: "content", label: "تکمیل محتوا" },
     { id: "settings", label: "تنظیمات" },
     { id: "sitemap", label: "Sitemap" },
     { id: "robots", label: "Robots.txt" },
@@ -269,6 +270,7 @@ export default function SeoPage() {
       {activeTab === "keywords"   && <KeywordsTab />}
       {activeTab === "ogpreview"  && <OgPreviewTab />}
       {activeTab === "webp"       && <WebpTab />}
+      {activeTab === "content"   && <ContentCompletionTab />}
       {activeTab === "settings"   && <SettingsTab />}
       {activeTab === "sitemap"    && <SitemapTab />}
       {activeTab === "robots"     && <RobotsTab initialContent={seoSettings?.robotsTxt ?? ""} />}
@@ -1555,6 +1557,261 @@ function WebpTab() {
           <li>کیفیت ۸۰–۸۵ برای اکثر تصاویر تعادل مناسبی بین کیفیت و حجم ایجاد می‌کند</li>
         </ul>
       </div>
+    </div>
+  );
+}
+
+// ─── Content Completion Tab ──────────────────────────────────────────────────
+type IncompleteItem = {
+  type: "product" | "post";
+  id: string;
+  slug: string;
+  name: string;
+  metaTitle: string;
+  metaDescription: string;
+  bodyHtml?: string;
+  body?: string;
+  issues: string[];
+};
+
+function ContentCompletionTab() {
+  const [items, setItems] = useState<IncompleteItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{
+    type: "product" | "post";
+    id: string;
+    metaTitle: string;
+    metaDescription: string;
+  } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/seo/incomplete");
+      const j = await res.json();
+      if (j.ok) setItems(j.items ?? []);
+      else setMessage(j.message ?? "خطا در بارگذاری");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "خطا");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const generate = async (item: IncompleteItem) => {
+    setGenerating(item.id);
+    setMessage("");
+    try {
+      const res = await fetch("/api/seo/generate-meta", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ type: item.type, id: item.id }),
+      });
+      const j = await res.json();
+      if (j.ok) {
+        setPreview({ type: item.type, id: item.id, metaTitle: j.metaTitle, metaDescription: j.metaDescription });
+      } else {
+        setMessage(j.message ?? "خطا در تولید");
+      }
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "خطا");
+    } finally {
+      setGenerating(null);
+    }
+  };
+
+  const apply = async () => {
+    if (!preview) return;
+    setSaving(true);
+    try {
+      const endpoint = `/api/cms/${preview.type === "product" ? "products" : "posts"}`;
+      const res = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          id: preview.id,
+          metaTitle: preview.metaTitle,
+          metaDescription: preview.metaDescription,
+        }),
+      });
+      const j = await res.json();
+      if (j.ok) {
+        setMessage("✓ متا تگ‌ها ذخیره شد.");
+        setPreview(null);
+        void load();
+      } else {
+        setMessage(j.message ?? "خطا در ذخیره");
+      }
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "خطا");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <p className="p-8" style={{ color: "var(--text-muted)" }}>در حال بارگذاری…</p>;
+
+  return (
+    <div className="flex flex-col gap-6">
+      {message && (
+        <div
+          className="rounded-md border p-3 text-sm"
+          style={{
+            borderColor: message.startsWith("✓") ? "#22c55e" : "#ef4444",
+            background: message.startsWith("✓") ? "#f0fdf4" : "#fef2f2",
+            color: message.startsWith("✓") ? "#16a34a" : "#dc2626",
+          }}
+        >
+          {message}
+        </div>
+      )}
+
+      <div className="rounded-md border p-4" style={card}>
+        <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-lg font-semibold" style={{ color: "var(--text)" }}>
+            محتواهای ناقص ({items.length})
+          </h3>
+          <Btn variant="outline" onClick={() => void load()}>
+            ↻ بازخوانی
+          </Btn>
+        </div>
+
+        {items.length === 0 ? (
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            همه محتواها متا تگ کامل دارند.
+          </p>
+        ) : (
+          <div className="overflow-auto rounded-md border" style={{ borderColor: "var(--border)" }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ background: "var(--surface)" }}>
+                  <th className="px-3 py-2 text-start" style={{ color: "var(--text)" }}>نوع</th>
+                  <th className="px-3 py-2 text-start" style={{ color: "var(--text)" }}>نام</th>
+                  <th className="px-3 py-2 text-start" style={{ color: "var(--text)" }}>مشکلات</th>
+                  <th className="px-3 py-2 text-start" style={{ color: "var(--text)" }}>عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={`${item.type}-${item.id}`} className="border-t" style={{ borderColor: "var(--border)" }}>
+                    <td className="px-3 py-2">
+                      <span
+                        className="rounded px-2 py-0.5 text-xs font-medium"
+                        style={{
+                          background: item.type === "product" ? "#dbeafe" : "#fce7f3",
+                          color: item.type === "product" ? "#1d4ed8" : "#be185d",
+                        }}
+                      >
+                        {item.type === "product" ? "محصول" : "مطلب"}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 font-medium" style={{ color: "var(--text)" }}>
+                      {item.name}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-col gap-1">
+                        {item.issues.map((issue, i) => (
+                          <span key={i} className="text-xs" style={{ color: issue.includes("خالی") ? "#ef4444" : "#f59e0b" }}>
+                            • {issue}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Btn onClick={() => void generate(item)} disabled={generating === item.id}>
+                        {generating === item.id ? "در حال تولید…" : "تولید با هوش مصنوعی"}
+                      </Btn>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {preview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="w-full max-w-lg rounded-md border p-6" style={card}>
+            <h3 className="mb-4 text-lg font-semibold" style={{ color: "var(--text)" }}>
+              پیش‌نمایش متا تگ‌های تولیدشده
+            </h3>
+
+            <div className="flex flex-col gap-3">
+              <label className="text-sm font-medium" style={{ color: "var(--text)" }}>
+                metaTitle
+                <input
+                  className="mt-1 w-full rounded-md border p-2 text-sm"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  value={preview.metaTitle}
+                  onChange={(e) => setPreview({ ...preview, metaTitle: e.target.value })}
+                  dir="ltr"
+                />
+                <span
+                  className="text-xs"
+                  style={{
+                    color:
+                      preview.metaTitle.length >= 30 && preview.metaTitle.length <= 60
+                        ? "#22c55e"
+                        : "#f59e0b",
+                  }}
+                >
+                  {preview.metaTitle.length} کاراکتر{" "}
+                  {preview.metaTitle.length < 30
+                    ? "(کوتاه)"
+                    : preview.metaTitle.length > 60
+                      ? "(بلند)"
+                      : "(مناسب)"}
+                </span>
+              </label>
+
+              <label className="text-sm font-medium" style={{ color: "var(--text)" }}>
+                metaDescription
+                <textarea
+                  className="mt-1 w-full rounded-md border p-2 text-sm"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+                  value={preview.metaDescription}
+                  onChange={(e) => setPreview({ ...preview, metaDescription: e.target.value })}
+                  rows={3}
+                  dir="ltr"
+                />
+                <span
+                  className="text-xs"
+                  style={{
+                    color:
+                      preview.metaDescription.length >= 100 && preview.metaDescription.length <= 160
+                        ? "#22c55e"
+                        : "#f59e0b",
+                  }}
+                >
+                  {preview.metaDescription.length} کاراکتر{" "}
+                  {preview.metaDescription.length < 100
+                    ? "(کوتاه)"
+                    : preview.metaDescription.length > 160
+                      ? "(بلند)"
+                      : "(مناسب)"}
+                </span>
+              </label>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <Btn onClick={() => void apply()} disabled={saving}>
+                {saving ? "در حال ذخیره…" : "اعمال"}
+              </Btn>
+              <Btn variant="outline" onClick={() => setPreview(null)}>
+                لغو
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

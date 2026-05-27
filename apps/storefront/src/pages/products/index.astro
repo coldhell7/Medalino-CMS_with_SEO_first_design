@@ -1,0 +1,38 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import StoreHeader from "../../components/store/StoreHeader.astro";
+import StoreFooter from "../../components/store/StoreFooter.astro";
+import ProductCard from "../../components/store/ProductCard.astro";
+import { getPublishedProducts } from "../../data/catalog";
+
+const products = getPublishedProducts();
+---
+
+<BaseLayout
+  title="همه محصولات | مدالینو"
+  description="لیست کامل محصولات فروشگاه مدالینو — مکمل، مراقبت پوست، سلامت خانواده و تجهیزات پزشکی"
+  canonicalPath="/products"
+>
+  <StoreHeader />
+  <main style="max-width:1200px;margin:0 auto;padding:var(--space-8) var(--space-4);">
+    <nav style="font-size:var(--text-sm);color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--space-6);">
+      <a href="/" style="color:var(--accent);text-decoration:none;">خانه</a>
+      <span aria-hidden="true">/</span>
+      <span style="color:var(--text);">محصولات</span>
+    </nav>
+    <h1 style="font-size:var(--text-3xl);font-weight:900;margin:0 0 var(--space-2);">همه محصولات</h1>
+    <p style="margin:0 0 var(--space-8);color:var(--text-muted);font-size:var(--text-base);">{products.length} محصول</p>
+    <div class="product-grid">
+      {products.map((p) => <ProductCard product={p} />)}
+    </div>
+  </main>
+  <StoreFooter />
+</BaseLayout>
+
+<style>
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-6);
+  }
+</style>

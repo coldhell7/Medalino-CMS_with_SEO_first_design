@@ -64,7 +64,7 @@ function getProductsForBlock(source: string) {
             subtitle={block.data.subtitle as string}
             linkText={block.data.linkText as string}
             linkHref={block.data.linkHref as string}
-            items={block.data.items as Array<{ title: string; subtitle: string; hue: number; gid: string; coverImage: string }>}
+            items={block.data.items as Array<{ title: string; subtitle: string; hue: number; gid: string; coverImage: string; href?: string }>}
           />
         );
       case "promo_products":

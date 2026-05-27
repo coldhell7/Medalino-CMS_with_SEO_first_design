@@ -5,6 +5,28 @@ import { randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
 
+export async function PUT(req: Request) {
+  try {
+    const body = (await req.json()) as Partial<CmsPost>;
+    if (!body.id) {
+      return NextResponse.json({ ok: false, message: "id_required" }, { status: 400 });
+    }
+    const posts = readPosts();
+    const idx = posts.findIndex((p) => p.id === body.id);
+    if (idx === -1) {
+      return NextResponse.json({ ok: false, message: "not_found" }, { status: 404 });
+    }
+    posts[idx] = { ...posts[idx], ...body };
+    writePosts(posts);
+    return NextResponse.json({ ok: true, post: posts[idx] });
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, message: e instanceof Error ? e.message : String(e) },
+      { status: 500 },
+    );
+  }
+}
+
 export async function GET() {
   try {
     return NextResponse.json({ ok: true, posts: readPosts() });

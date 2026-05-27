@@ -9,8 +9,10 @@ import { formatJalaliDate } from "@repo/shared";
 export default function CmsPostsPage() {
   const [posts, setPosts] = useState<CmsPost[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
     void (async () => {
       try {
         const res = await fetch("/api/cms/posts");
@@ -62,7 +64,7 @@ export default function CmsPostsPage() {
                   <td className="py-2 font-mono text-xs">{p.slug}</td>
                   <td className="py-2">{p.status === "publish" ? "منتشر" : "پیش‌نویس"}</td>
                   <td className="py-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                    {formatJalaliDate(p.date, { time: true })}
+                    {hydrated ? formatJalaliDate(p.date, { time: true }) : p.date}
                   </td>
                   <td className="py-2">
                     <Link href={`/cms/posts/${p.id}/edit`} className="font-bold no-underline" style={{ color: "var(--accent)" }}>

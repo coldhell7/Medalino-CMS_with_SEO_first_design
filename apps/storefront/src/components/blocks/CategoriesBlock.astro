@@ -7,7 +7,7 @@ export interface Props {
   subtitle: string;
   linkText: string;
   linkHref: string;
-  items: Array<{ title: string; subtitle: string; hue: number; gid: string; coverImage: string }>;
+  items: Array<{ title: string; subtitle: string; hue: number; gid: string; coverImage: string; href?: string }>;
 }
 
 const { eyebrow, title, subtitle, linkText, linkHref, items } = Astro.props;
@@ -24,7 +24,7 @@ const { eyebrow, title, subtitle, linkText, linkHref, items } = Astro.props;
   </div>
   <div class="cat-grid">
     {items.map((c) => (
-      <a href={linkHref || "#"} class="cat-grid__link">
+      <a href={c.href || linkHref || "#"} class="cat-grid__link">
         <CategoryTile title={c.title} subtitle={c.subtitle} hue={c.hue} gid={c.gid} coverImage={c.coverImage} />
       </a>
     ))}

@@ -6,6 +6,28 @@ import type { CmsProduct } from "@repo/cms/types";
 
 export const runtime = "nodejs";
 
+export async function PUT(req: Request) {
+  try {
+    const body = (await req.json()) as Partial<CmsProduct>;
+    if (!body.id) {
+      return NextResponse.json({ ok: false, message: "id_required" }, { status: 400 });
+    }
+    const products = readProducts();
+    const idx = products.findIndex((p) => p.id === body.id);
+    if (idx === -1) {
+      return NextResponse.json({ ok: false, message: "not_found" }, { status: 404 });
+    }
+    products[idx] = { ...products[idx], ...body };
+    writeProducts(products);
+    return NextResponse.json({ ok: true, product: products[idx] });
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, message: e instanceof Error ? e.message : String(e) },
+      { status: 500 },
+    );
+  }
+}
+
 export async function GET() {
   try {
     return NextResponse.json({ ok: true, products: readProducts() });

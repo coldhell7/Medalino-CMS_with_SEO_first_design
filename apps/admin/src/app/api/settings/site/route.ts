@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import {
+  getEffectiveDeepSeekApiKey,
   getEffectiveGeminiApiKey,
+  getEffectiveOpenRouterApiKey,
   getSiteSettings,
   maskApiKey,
   updateSiteSettings,
@@ -17,6 +19,12 @@ export async function GET() {
   let geminiSource: "env" | "file" | "none" = "none";
   if (envGemini) geminiSource = "env";
   else if (effective) geminiSource = "file";
+
+  const openrouterKey = getEffectiveOpenRouterApiKey();
+  const envOr = Boolean(process.env.OPENROUTER_API_KEY?.trim());
+
+  const deepseekKey = getEffectiveDeepSeekApiKey();
+  const envDs = Boolean(process.env.DEEPSEEK_API_KEY?.trim());
 
   return NextResponse.json({
     ok: true,
@@ -39,11 +47,27 @@ export async function GET() {
       textLight: settings.textLight,
       textMutedLight: settings.textMutedLight,
       accentLight: settings.accentLight,
+      openrouterModel: settings.openrouterModel || "deepseek/deepseek-chat",
+      openrouterBaseUrl: settings.openrouterBaseUrl || "https://openrouter.ai",
+      defaultAiProvider: settings.defaultAiProvider || "deepseek",
+      contentPrompt: settings.contentPrompt || "",
+      productPrompt: settings.productPrompt || "",
     },
     gemini: {
       source: geminiSource,
       configured: Boolean(effective),
       maskedKey: effective ? maskApiKey(effective) : null,
+    },
+    openrouter: {
+      configured: Boolean(openrouterKey),
+      source: envOr ? "env" : openrouterKey ? "file" : "none",
+      maskedKey: openrouterKey ? maskApiKey(openrouterKey) : null,
+      model: settings.openrouterModel || "deepseek/deepseek-chat",
+    },
+    deepseek: {
+      configured: Boolean(deepseekKey),
+      source: envDs ? "env" : deepseekKey ? "file" : "none",
+      maskedKey: deepseekKey ? maskApiKey(deepseekKey) : null,
     },
   });
 }
@@ -71,7 +95,11 @@ export async function PUT(req: Request) {
     if (body.textLight !== undefined) updates.textLight = body.textLight;
     if (body.textMutedLight !== undefined) updates.textMutedLight = body.textMutedLight;
     if (body.accentLight !== undefined) updates.accentLight = body.accentLight;
-    if (body.geminiApiKey !== undefined) updates.geminiApiKey = body.geminiApiKey;
+    if (body.openrouterModel !== undefined) updates.openrouterModel = body.openrouterModel;
+    if (body.openrouterBaseUrl !== undefined) updates.openrouterBaseUrl = body.openrouterBaseUrl;
+    if (body.defaultAiProvider !== undefined) updates.defaultAiProvider = body.defaultAiProvider as "gemini" | "openrouter" | "deepseek";
+    if (body.contentPrompt !== undefined) updates.contentPrompt = body.contentPrompt;
+    if (body.productPrompt !== undefined) updates.productPrompt = body.productPrompt;
 
     const updated = updateSiteSettings(updates);
 
@@ -84,11 +112,17 @@ export async function PUT(req: Request) {
         theme: updated.theme,
         accentColor: updated.accentColor,
         faviconDataUrl: updated.faviconDataUrl ? "uploaded" : "",
+        defaultAiProvider: updated.defaultAiProvider || "deepseek",
       },
       gemini: {
         source: process.env.GEMINI_API_KEY?.trim() ? "env" : "file",
         configured: Boolean(getEffectiveGeminiApiKey()),
         maskedKey: getEffectiveGeminiApiKey() ? maskApiKey(getEffectiveGeminiApiKey()!) : null,
+      },
+      deepseek: {
+        source: process.env.DEEPSEEK_API_KEY?.trim() ? "env" : "file",
+        configured: Boolean(getEffectiveDeepSeekApiKey()),
+        maskedKey: getEffectiveDeepSeekApiKey() ? maskApiKey(getEffectiveDeepSeekApiKey()!) : null,
       },
     });
   } catch (e) {

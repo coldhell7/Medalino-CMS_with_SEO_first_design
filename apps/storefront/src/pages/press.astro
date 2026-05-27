@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import StoreHeader from "../components/store/StoreHeader.astro";
+import StoreFooter from "../components/store/StoreFooter.astro";
+import blocks from "@repo/cms/content/homepage-blocks.json";
+import type { CmsBlock } from "@repo/cms/types";
+
+const pressBlock = (blocks as CmsBlock[]).find((b) => b.type === "media_press");
+const items = (pressBlock?.data?.items as Array<{ name: string; logo: string; url: string; quote: string }>) ?? [];
+---
+
+<BaseLayout
+  title="رسانه‌ها | مدالینو"
+  description="بازتاب مدالینو در رسانه‌های معتبر"
+  canonicalPath="/press"
+>
+  <StoreHeader />
+  <main style="max-width:720px;margin:0 auto;padding:var(--space-8);">
+    <nav style="font-size:var(--text-sm);color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--space-6);">
+      <a href="/" style="color:var(--accent);text-decoration:none;">خانه</a>
+      <span aria-hidden="true">/</span>
+      <span style="color:var(--text);">رسانه‌ها</span>
+    </nav>
+    <h1 style="font-size:var(--text-3xl);font-weight:900;margin:0 0 var(--space-2);">رسانه‌ها</h1>
+    <p style="margin:0 0 var(--space-8);color:var(--text-muted);">بازتاب مدالینو در رسانه‌های معتبر</p>
+    <div class="press-grid">
+      {items.map((item) => (
+        <article class="press-card">
+          <div class="press-card__logo">
+            <img src={item.logo} alt={item.name} width="80" height="80" loading="lazy" decoding="async" />
+          </div>
+          <strong class="press-card__name">{item.name}</strong>
+          <p class="press-card__quote">{item.quote}</p>
+        </article>
+      ))}
+    </div>
+  </main>
+  <StoreFooter />
+</BaseLayout>
+
+<style>
+  .press-grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .press-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+  .press-card__logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--bg-muted);
+  }
+  .press-card__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .press-card__name {
+    font-size: var(--text-lg);
+    font-weight: 800;
+  }
+  .press-card__quote {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    max-width: 400px;
+  }
+</style>

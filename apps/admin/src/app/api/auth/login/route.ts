@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   const jar = await cookies();
   jar.set(getCookieName(), value, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
